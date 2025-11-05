@@ -1,0 +1,163 @@
+const mysql = require('mysql2/promise');
+require('dotenv').config();
+
+const pool = mysql.createPool({
+  host: process.env.DB_HOST || 'localhost',
+  user: process.env.DB_USER || 'root',
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME || 'vaulttechotel',
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0
+});
+
+let pool
+
+// helpers que devuelven promesas
+const run = (sql, params = []) => new Promise((resolve, reject) => {
+  db.run(sql, params, function (err) {
+    if (err) return reject(err)
+    resolve(this)
+  })
+})
+
+const get = (sql, params = []) => new Promise((resolve, reject) => {
+  db.get(sql, params, (err, row) => {
+    if (err) return reject(err)
+    resolve(row)
+  })
+})
+
+const all = (sql, params = []) => new Promise((resolve, reject) => {
+  db.all(sql, params, (err, rows) => {
+    if (err) return reject(err)
+    resolve(rows)
+  })
+})
+
+;(async function initDb () {
+  try {
+    await run(`CREATE TABLE IF NOT EXISTS rooms (
+      id TEXT PRIMARY KEY,
+      name TEXT NOT NULL,
+      price REAL,
+      capacity INTEGER,
+      description TEXT,
+      image TEXT
+    );`)
+
+    await run(`CREATE TABLE IF NOT EXISTS services (
+      id TEXT PRIMARY KEY,
+      title TEXT NOT NULL,
+      details TEXT
+    );`)
+
+    await run(`CREATE TABLE IF NOT EXISTS reservations (
+      id TEXT PRIMARY KEY,
+      name TEXT NOT NULL,
+      email TEXT NOT NULL,
+      roomId TEXT,
+      checkin TEXT,
+      checkout TEXT,
+      guests INTEGER,
+      notes TEXT,
+      createdAt TEXT
+    );`)
+
+    // Seed inicial si está vacío
+    const roomCount = await get('SELECT COUNT(*) as cnt FROM rooms')
+    if (roomCount && roomCount.cnt === 0) {
+      const rooms = require('./seed/rooms')
+      await run('BEGIN TRANSACTION')
+      for (const r of rooms) {
+        await run('INSERT INTO rooms (id,name,price,capacity,description,image) VALUES (?,?,?,?,?,?)', [r.id, r.name, r.price, r.capacity, r.description, r.image])
+      }
+      await run('COMMIT')
+    }
+
+    const svcCount = await get('SELECT COUNT(*) as cnt FROM services')
+    if (svcCount && svcCount.cnt === 0) {
+      const services = require('./seed/services')
+      await run('BEGIN TRANSACTION')
+      for (const s of services) {
+        await run('INSERT INTO services (id,title,details) VALUES (?,?,?)', [s.id, s.title, s.details])
+      }
+      await run('COMMIT')
+    }
+  } catch (err) {
+    console.error('Error inicializando DB:', err)
+  }
+})()
+
+module.exports = {
+  getRooms: async () => all('SELECT * FROM rooms ORDER BY name'),
+  getServices: async () => all('SELECT * FROM services ORDER BY title'),
+  createReservation: async (data) => {
+    const id = 'res_' + Date.now()
+    const obj = {
+      id,
+      name: data.name,
+      email: data.email,
+      roomId: data.roomId,
+      checkin: data.checkin,
+      checkout: data.checkout,
+      guests: data.guests || 1,
+      notes: data.notes || '',
+      createdAt: new Date().toISOString()
+    }
+    await run(`INSERT INTO reservations (id,name,email,roomId,checkin,checkout,guests,notes,createdAt)
+      VALUES (?,?,?,?,?,?,?,?,?)`, [obj.id, obj.name, obj.email, obj.roomId, obj.checkin, obj.checkout, obj.guests, obj.notes, obj.createdAt])
+    return obj
+  },
+  getReservations: async () => all('SELECT * FROM reservations ORDER BY createdAt DESC'),
+  getReservationById: async (id) => get('SELECT * FROM reservations WHERE id = ?', [id])
+}
+
+// Seed inicial (si no existen filas)
+function seedIfEmpty() {
+  const row = db.prepare('SELECT COUNT(*) as cnt FROM rooms').get()
+  if (row.cnt === 0) {
+    const rooms = require('./seed/rooms.js')
+    const insert = db.prepare('INSERT INTO rooms (id,name,price,capacity,description,image) VALUES (@id,@name,@price,@capacity,@description,@image)')
+    const insertMany = db.transaction((items) => {
+      for (const i of items) insert.run(i)
+    })
+    insertMany(rooms)
+  }
+
+  const svcRow = db.prepare('SELECT COUNT(*) as cnt FROM services').get()
+  if (svcRow.cnt === 0) {
+    const services = require('./seed/services.js')
+    const insert = db.prepare('INSERT INTO services (id,title,details) VALUES (@id,@title,@details)')
+    const insertMany = db.transaction((items) => {
+      for (const i of items) insert.run(i)
+    })
+    insertMany(services)
+  }
+}
+seedIfEmpty()
+
+module.exports = {
+  getRooms: () => db.prepare('SELECT * FROM rooms ORDER BY name').all(),
+  getServices: () => db.prepare('SELECT * FROM services ORDER BY title').all(),
+  createReservation: (data) => {
+    const id = 'res_' + Date.now()
+    const stmt = db.prepare(`INSERT INTO reservations (id,name,email,roomId,checkin,checkout,guests,notes,createdAt)
+      VALUES (@id,@name,@email,@roomId,@checkin,@checkout,@guests,@notes,@createdAt)`)
+    const obj = {
+      id,
+      name: data.name,
+      email: data.email,
+      roomId: data.roomId,
+      checkin: data.checkin,
+      checkout: data.checkout,
+      guests: data.guests || 1,
+      notes: data.notes || '',
+      createdAt: new Date().toISOString()
+    }
+    stmt.run(obj)
+    return obj
+  },
+  getReservations: () => db.prepare('SELECT * FROM reservations ORDER BY createdAt DESC').all(),
+  getReservationById: (id) => db.prepare('SELECT * FROM reservations WHERE id = ?').get(id)
+}

@@ -1,0 +1,16 @@
+# Puerto del servidor
+PORT=4000
+
+# Archivo sqlite (ruta relativa a este directorio)
+DATABASE_FILE=./data/vaulttec.db
+
+# SMTP (opcional — si no lo configuras se usará Ethereal para pruebas)
+SMTP_HOST=smtp.example.com
+SMTP_PORT=587
+SMTP_USER=your_smtp_user
+SMTP_PASS=your_smtp_pass
+
+# Dirección 'from' para emails
+EMAIL_FROM="Vault-Tec <no-reply@vault-tec.example>"
+# Dirección donde quieres recibir notificaciones de reservas
+EMAIL_TO=reservas@vault-tec.example
