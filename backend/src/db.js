@@ -51,6 +51,17 @@ pool.getConnection()
       )
     `);
 
+    await connection.execute(`
+      CREATE TABLE IF NOT EXISTS users (
+        id VARCHAR(50) PRIMARY KEY,
+        name VARCHAR(100) NOT NULL,
+        email VARCHAR(255) UNIQUE NOT NULL,
+        password VARCHAR(255) NOT NULL,
+        role VARCHAR(20) DEFAULT 'user',
+        createdAt DATETIME DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
     // Verificar si hay datos en las tablas
     const [roomCount] = await connection.execute('SELECT COUNT(*) as cnt FROM rooms');
     if (roomCount[0].cnt === 0) {
@@ -123,5 +134,33 @@ module.exports = {
   getReservationById: async (id) => {
     const [rows] = await pool.execute('SELECT * FROM reservations WHERE id = ?', [id]);
     return rows[0];
-  }
+  },
+  getUserByEmail: async (email) => {
+    const [rows] = await pool.execute('SELECT * FROM users WHERE email = ?', [email]);
+    // Devuelve el primer usuario encontrado (o undefined si no existe)
+    return rows[0]; 
+  },
+
+  createUser: async (userData) => {
+    // auth.js ya nos pasa la contraseña hasheada
+    const id = 'user_' + Date.now();
+    const newUser = {
+      id,
+      name: userData.name,
+      email: userData.email,
+      password: userData.password, // Esta ya viene hasheada desde auth.js
+      role: 'user',
+      createdAt: new Date()
+    };
+
+    await pool.execute(
+      `INSERT INTO users (id, name, email, password, role, createdAt)
+       VALUES (?, ?, ?, ?, ?, ?)`,
+      [newUser.id, newUser.name, newUser.email, newUser.password, newUser.role, newUser.createdAt]
+    );
+
+    // Devolvemos el usuario (sin la contraseña) como lo espera auth.js
+    const { password, ...userWithoutPassword } = newUser;
+    return userWithoutPassword;
+    }
 };

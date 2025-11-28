@@ -41,7 +41,8 @@ export default function Login() {
       display: 'flex',
       justifyContent: 'center',
       alignItems: 'center',
-      minHeight: 'calc(100vh - 200px)'
+      minHeight: 'calc(100vh - 200px)',
+      padding: '20px'
     }}>
       <div className="auth-box" style={{
         width: '100%',
@@ -49,12 +50,15 @@ export default function Login() {
         padding: '2rem',
         backgroundColor: '#fff',
         borderRadius: '10px',
-        boxShadow: '0 0 20px rgba(0,0,0,0.1)'
+        // Sombra azulada sutil para dar tema
+        boxShadow: '0 4px 20px rgba(0, 78, 152, 0.2)',
+        border: '1px solid var(--vault-blue)' // Borde azul fino
       }}>
         <h2 style={{
           textAlign: 'center',
           marginBottom: '1.5rem',
-          color: '#2a9d8f'
+          color: 'var(--vault-blue)', // CAMBIO: Azul Vault-Tec
+          fontWeight: 'bold'
         }}>{isLogin ? 'Iniciar Sesión' : 'Crear Cuenta'}</h2>
         
         <form onSubmit={submit}>
@@ -62,16 +66,17 @@ export default function Login() {
             <div style={{
               padding: '0.75rem',
               marginBottom: '1rem',
-              backgroundColor: '#f8d7da',
-              color: '#842029',
+              backgroundColor: '#fee2e2',
+              color: '#991b1b',
               borderRadius: '6px',
-              fontSize: '0.9rem'
+              fontSize: '0.9rem',
+              border: '1px solid #f87171'
             }}>{error}</div>
           )}
 
           {!isLogin && (
             <div className="form-group" style={{ marginBottom: '1rem' }}>
-              <label style={{ display: 'block', marginBottom: '0.5rem', color: '#333' }}>
+              <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--vault-blue)', fontWeight: 'bold' }}>
                 Nombre de usuario
               </label>
               <input
@@ -83,7 +88,7 @@ export default function Login() {
                   width: '100%',
                   padding: '0.75rem',
                   borderRadius: '4px',
-                  border: '1px solid #ddd',
+                  border: '1px solid #ccc',
                   fontSize: '1rem'
                 }}
               />
@@ -91,7 +96,7 @@ export default function Login() {
           )}
 
           <div className="form-group" style={{ marginBottom: '1rem' }}>
-            <label style={{ display: 'block', marginBottom: '0.5rem', color: '#333' }}>
+            <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--vault-blue)', fontWeight: 'bold' }}>
               Correo electrónico
             </label>
             <input
@@ -104,14 +109,14 @@ export default function Login() {
                 width: '100%',
                 padding: '0.75rem',
                 borderRadius: '4px',
-                border: '1px solid #ddd',
+                border: '1px solid #ccc',
                 fontSize: '1rem'
               }}
             />
           </div>
 
           <div className="form-group" style={{ marginBottom: '1.5rem' }}>
-            <label style={{ display: 'block', marginBottom: '0.5rem', color: '#333' }}>
+            <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--vault-blue)', fontWeight: 'bold' }}>
               Contraseña
             </label>
             <input
@@ -124,29 +129,25 @@ export default function Login() {
                 width: '100%',
                 padding: '0.75rem',
                 borderRadius: '4px',
-                border: '1px solid #ddd',
+                border: '1px solid #ccc',
                 fontSize: '1rem'
               }}
             />
           </div>
 
+          {/* CAMBIO: Usamos la clase btn-primary (Amarillo) */}
           <button
             type="submit"
             disabled={loading}
+            className="btn-primary" 
             style={{
-              width: '100%',
-              padding: '0.75rem',
-              backgroundColor: '#2a9d8f',
-              color: 'white',
-              border: 'none',
-              borderRadius: '4px',
-              fontSize: '1rem',
-              cursor: 'pointer',
-              transition: 'background-color 0.2s',
-              marginBottom: '1rem'
+              width: '100%', // Forzamos ancho completo
+              marginBottom: '1rem',
+              border: '2px solid var(--vault-yellow)',
+              cursor: 'pointer'
             }}
           >
-            {loading ? 'Procesando...' : (isLogin ? 'Iniciar Sesión' : 'Crear Cuenta')}
+            {loading ? 'Procesando...' : (isLogin ? 'Acceder al Refugio' : 'Registrarse')}
           </button>
 
           <div style={{ textAlign: 'center' }}>
@@ -156,9 +157,10 @@ export default function Login() {
               style={{
                 background: 'none',
                 border: 'none',
-                color: '#2a9d8f',
+                color: 'var(--vault-blue)', // CAMBIO: Azul Vault-Tec
                 cursor: 'pointer',
-                fontSize: '0.9rem'
+                fontSize: '0.9rem',
+                textDecoration: 'underline'
               }}
             >
               {isLogin ? '¿No tienes cuenta? Créala aquí' : '¿Ya tienes cuenta? Inicia sesión'}

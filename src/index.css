@@ -1,8 +1,9 @@
 :root{
-  --accent:#0b4f6c;
-  --muted:#6c757d;
-  --bg:#f7f8fa;
-  --card:#ffffff;
+  --vault-blue: #004E98;    /* El azul profundo de los trajes */
+  --vault-yellow: #FFD700;  /* El amarillo brillante del logo */
+  --vault-grey: #F0F0F0;    /* Fondo gris claro industrial */
+  --text-dark: #1F2937;     /* Texto oscuro para lectura */
+  --text-light: #FFFFFF;    /* Texto claro para fondo azul */
 }
 
 *{box-sizing:border-box}
@@ -11,12 +12,18 @@ body{
   font-family:Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
   background:var(--bg);
   color:#111;
+
+  background-color: var(--vault-grey); /* Fondo general de la web */
+  color: var(--text-dark);
 }
 
 .header{
-  background:linear-gradient(90deg,var(--accent),#2a9d8f);
-  color:white;
-  padding:14px 20px;
+  /* Reemplaza tu background actual con esto */
+  background-color: var(--vault-blue); 
+  color: var(--text-light); /* Letras blancas */
+  
+  /* Opcional: Un borde inferior amarillo queda genial */
+  border-bottom: 5px solid var(--vault-yellow);
 }
 
 .container{
@@ -83,9 +90,47 @@ body{
   text-decoration:none;
 }
 
+
+/* En tu index.css o App.css */
+
+.btn-primary {
+  background-color: var(--vault-yellow); /* Amarillo */
+  color: var(--vault-blue); /* Texto Azul */
+  font-weight: bold;
+  border: 2px solid var(--vault-yellow);
+  padding: 10px 20px;
+  border-radius: 5px; /* Bordes un poco redondeados */
+  text-decoration: none; /* Por si usas etiquetas <a> o Link */
+  display: inline-block;
+  transition: transform 0.1s; /* Animación suave */
+}
+
+.btn-primary:hover {
+  background-color: #e6c200;
+  transform: scale(1.05); /* Crece un poquito al pasar el mouse */
+}
+
+.btn-secondary {
+  background-color: var(--vault-blue); /* Azul */
+  color: var(--vault-yellow); /* Texto Amarillo */
+  border: 2px solid var(--vault-yellow);
+  padding: 10px 20px;
+  border-radius: 5px;
+  text-decoration: none;
+  display: inline-block;
+  margin-right: 15px; /* Espacio entre botones */
+}
+
+.btn-secondary:hover {
+  background-color: #003d7a;
+}
+
+
+
 .field{display:flex;flex-direction:column;gap:6px;margin-bottom:10px}
 input[type="text"], input[type="email"], input[type="date"], select, textarea{
   padding:8px;border:1px solid #e6e9ee;border-radius:6px
 }
 
 .small{font-size:14px;color:var(--muted)}
+
